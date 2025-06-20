@@ -31,14 +31,17 @@ class auth_plugin_oauth2redirect extends auth_plugin_base {
             mtrace("Auth OAuth2Redirect Plugin: Critical - Moodle core OAuth2 API class ('\\core\\oauth2\\api') not found. Cannot perform redirect.");
             return;
         }
-
+       
+        $wantsurl = $SESSION->wantsurl;
+        if (empty($wantsurl) || strpos(trim(parse_url($wantsurl, PHP_URL_PATH), '/'), 'auth') === 0) {
+            $wantsurl = '/my/';
+        }
         try {
             $loginurl = new \moodle_url('/auth/oauth2/login.php', [
                 'id' => $issuerid,
                 'sesskey' => sesskey(),
-                'wantsurl' => $SESSION->wantsurl
+                'wantsurl' => $wantsurl
             ]);
-
             if ($loginurl instanceof \moodle_url && $loginurl->out(false) !== '') {
                 redirect($loginurl);
             } else {
